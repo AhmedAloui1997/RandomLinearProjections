@@ -62,7 +62,7 @@ def SplitDataset(X, y, shift, train_size):
         train_indices = []
         
         for i in range(num_samples):
-            if condition[i]:
+            if condition[i].all():
                 # Sample with probability p
                 if np.random.rand() < shift:
                     train_indices.append(i)
@@ -121,5 +121,5 @@ def train_test_split_fixed(X, y, train_size, shuffle=True, random_state=None):
     
     y_train = y[train_indices]
     y_test = y[test_indices]
-    
+
     return X_train, X_test, y_train, y_test
