@@ -30,15 +30,15 @@ def train(X, y, shift, train_size, task, iterations, epochs, batch_size, num_bat
             criterion = nn.MSELoss()
             
             if loss_function == 'MSE':  
-                optimizer = optim.Adam(model.parameters(), lr=0.00001)
+                optimizer = optim.Adam(model.parameters(), lr=0.0001)
                 loss_train, loss_test = train_mse_reg(X_train_tensor, X_test_tensor, y_train_tensor, y_test_tensor, iterations, i, epochs, batch_size, model, optimizer, criterion)
             
-            elif loss_function == 'MSE_L2':  
-                optimizer = optim.Adam(model.parameters(), lr=0.00001, weight_decay=1e-4)
+            elif loss_function == 'MSEL2':  
+                optimizer = optim.Adam(model.parameters(), lr=0.0001, weight_decay=1e-4)
                 loss_train, loss_test = train_mse_reg(X_train_tensor, X_test_tensor, y_train_tensor, y_test_tensor, iterations, i, epochs, batch_size, model, optimizer, criterion)
   
             elif loss_function == 'RLP':
-                optimizer = optim.Adam(model.parameters(), lr=0.00001)
+                optimizer = optim.Adam(model.parameters(), lr=0.0001)
                 loss_train, loss_test = train_rlp_reg(X_train_tensor, X_test_tensor, y_train_tensor, y_test_tensor, iterations, i, epochs, batch_size, num_batches, model, optimizer, criterion)
                 
     
@@ -84,7 +84,7 @@ def train_mse_reg(X_train_tensor, X_test_tensor, y_train_tensor, y_test_tensor, 
     
         epoch_loss /= len(train_dataloader)
         loss_train[epoch] = epoch_loss
-        loss_test[epoch] = epoch_loss
+        loss_test[epoch] = test_loss
         print(f'Iteration [{i + 1}/{iterations}],    Epoch [{epoch + 1}/{epochs}], Train Loss: {epoch_loss:.4f},    Test Loss: {test_loss:.4f}')
         
     return loss_train, loss_test
@@ -123,7 +123,7 @@ def train_rlp_reg(X_train_tensor, X_test_tensor, y_train_tensor, y_test_tensor, 
     
         epoch_loss /= num_batches
         loss_train[epoch] = epoch_loss
-        loss_test[epoch] = epoch_loss
+        loss_test[epoch] = test_loss
         print(f'Iteration [{i + 1}/{iterations}],    Epoch [{epoch + 1}/{epochs}], Train Loss: {epoch_loss:.4f},    Test Loss: {test_loss:.4f}')
         
     return loss_train, loss_test
