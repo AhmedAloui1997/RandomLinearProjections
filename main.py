@@ -7,8 +7,8 @@ import os
 sys.path.append('./RandomLinearProjections')
 from utils.upload_data import LoadDataset
 from utils.process_data import SplitDataset
-from models.train import train
-
+from models.train_regression import train
+from models.train_autoencoder import train_encoder_results
 # to run file: python3 main.py --Dataset "DatasetName" (optional: --Shift "Shift", etc.)
 
 if __name__ == "__main__":
@@ -35,9 +35,19 @@ if __name__ == "__main__":
     shift = args.Shift
 
     # This function calls the dataset we need for the experiment
-    X, y = LoadDataset(DatasetName);
+    # distinguish between regression and autoencoder
+    if task == 'Regression':
+        X, y = LoadDataset(DatasetName)
+        train_losses, test_losses = train(X, y, shift, train_size, task, iterations, epochs, batch_size, num_batches, loss_function)
+    elif task == 'Autoencoder':
+        X_train, X_test = LoadDataset(DatasetName)
+        train_losses, test_losses = train_encoder_results(X_train, X_test, shift, train_size, task, iterations, epochs, batch_size, num_batches, loss_function)
+    elif task == 'VAE':
+        pass
+    else:
+        print('Error: Task must be Regression or Autoencoder')
+
     
-    train_losses, test_losses = train(X, y, shift, train_size, task, iterations, epochs, batch_size, num_batches, loss_function)
     
     # Path for the directory
     results_dir = 'Results'

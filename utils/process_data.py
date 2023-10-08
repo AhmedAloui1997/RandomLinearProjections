@@ -43,6 +43,7 @@ def balanced_batch_generator_auto(data, N, K):
     for indices in selected_batches:
         yield data[torch.tensor(indices)]  # use torch tensors for indexing
 
+# splitting datasets for regression tasks
 def SplitDataset(X, y, shift, train_size):
     
     if shift == -1:
