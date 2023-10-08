@@ -16,7 +16,7 @@ if __name__ == "__main__":
     parser.add_argument('--Dataset', type=str, help='Dataset to upload', required=True)
     parser.add_argument('--Task', type=str, default='Regression', help='Task (Regression or Autoencoder)')
     parser.add_argument('--LossFunction', type=str, default='MSE', help='Loss function (MSE, MSEL2, or RLP)')
-    parser.add_argument('--TrainSize', type=float, default=10000, help="Training dataset size", required=False)
+    parser.add_argument('--TrainSize', type=int, default=10000, help="Training dataset size", required=False)
     parser.add_argument('--BatchSize', type=int, default=100, help='Size of each training batch')
     parser.add_argument('--NumBatches', type=int, default=1000, help='Number of RLP Loss Training Batches')
     parser.add_argument('--Epochs', type=int, default=500, help='Number of training epochs')
