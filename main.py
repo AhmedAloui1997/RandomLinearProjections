@@ -19,8 +19,8 @@ if __name__ == "__main__":
     parser.add_argument('--TrainSize', type=int, default=10000, help="Training dataset size", required=False)
     parser.add_argument('--BatchSize', type=int, default=100, help='Size of each training batch')
     parser.add_argument('--NumBatches', type=int, default=1000, help='Number of RLP Loss Training Batches')
-    parser.add_argument('--Epochs', type=int, default=500, help='Number of training epochs')
-    parser.add_argument('--Iterations', type=int, default=30, help='Number of iterations to repeat task')
+    parser.add_argument('--Epochs', type=int, default=5, help='Number of training epochs')
+    parser.add_argument('--Iterations', type=int, default=3, help='Number of iterations to repeat task')
     parser.add_argument('--Shift', type=float, default=-1, help="Dataset shift", required=False)
     args = parser.parse_args()
     
@@ -36,12 +36,14 @@ if __name__ == "__main__":
 
     # This function calls the dataset we need for the experiment
     # distinguish between regression and autoencoder
+    print(f" Uploading Dataset: {DatasetName}")
     if task == 'Regression':
         X, y = LoadDataset(DatasetName)
         train_losses, test_losses = train(X, y, shift, train_size, task, iterations, epochs, batch_size, num_batches, loss_function)
     elif task == 'Autoencoder':
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         X_train, X_test = LoadDataset(DatasetName)
-        train_losses, test_losses = train_encoder_results(X_train, X_test, shift, train_size, task, iterations, epochs, batch_size, num_batches, loss_function)
+        train_losses, test_losses = train_encoder_results(X_train, X_test, shift, train_size, task, iterations, epochs, batch_size, num_batches, loss_function,device)
     elif task == 'VAE':
         pass
     else:

@@ -102,7 +102,6 @@ def train_rlp_reg(X_train_tensor, X_test_tensor, y_train_tensor, y_test_tensor, 
             c = torch.linalg.lstsq(batch_X, batch_y).solution
             c_pred = torch.linalg.lstsq(batch_X, outputs).solution
             loss = criterion(batch_X @ c_pred, batch_X @ c) # RLP Loss
-            print(loss)
     
             # Backward pass
             loss.backward()

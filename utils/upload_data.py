@@ -20,8 +20,9 @@ def LoadDataset(DatasetName):
     # image datasets
     elif DatasetName == "MNIST":
         transform = transforms.ToTensor()
-        output1 = datasets.MNIST(root='data/', train=True, transform=transform, download=True)
-        output2 = datasets.MNIST(root='data/', train=False, transform=transform, download=True)
+        output1 = datasets.MNIST(root='data/', train=True, transform=transform, download=False)
+        output2 = datasets.MNIST(root='data/', train=False, transform=transform, download=False)
+        print("MNIST dataset loaded")
     elif DatasetName == "CIFAR10":
         transform = transforms.ToTensor()
         output1 = datasets.CIFAR10(root="./data", train=True, transform=transform, download=True)
