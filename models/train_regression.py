@@ -4,17 +4,21 @@ import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
 import numpy as np
 from models.classes import RegressionModel, Autoencoder
-from utils.process_data import SplitDataset
+from utils.process_data import SplitDataset, add_gaussian_noise
 from utils.process_data import balanced_batch_generator_reg, balanced_batch_generator_auto
 
-def train(X, y, shift, train_size, task, iterations, epochs, batch_size, num_batches, loss_function):
+def train(X, y, noise, shift, train_size, task, iterations, epochs, batch_size, num_batches, loss_function):
     train_losses = np.zeros((iterations, epochs))
     test_losses = np.zeros((iterations, epochs))
     
     for i in range(iterations):     
-        #if task == 'Regression':
         # Divide the dataset into train and test
         X_train, X_test, y_train, y_test = SplitDataset(X, y, shift, train_size)
+        
+        if noise >= 0:
+            # If noise mean > 0, add gaussian noise
+            X_train = add_gaussian_noise(X_train, noise)
+        
         # Convert numpy arrays to PyTorch tensors
         X_train_tensor = torch.tensor(X_train, dtype=torch.float32)
         X_test_tensor = torch.tensor(X_test, dtype=torch.float32)
@@ -47,7 +51,7 @@ def train(X, y, shift, train_size, task, iterations, epochs, batch_size, num_bat
 def train_mse_reg(X_train_tensor, X_test_tensor, y_train_tensor, y_test_tensor, iterations, i, epochs, batch_size, model, optimizer, criterion):
     # Create DataLoader
     train_dataset = TensorDataset(X_train_tensor, y_train_tensor)
-    train_dataloader = DataLoader(train_dataset, batch_size=100, shuffle=True)
+    train_dataloader = DataLoader(train_dataset, batch_size, shuffle=True)
     
     # Instantiate train and test loss
     loss_train = np.zeros(epochs)
@@ -99,8 +103,8 @@ def train_rlp_reg(X_train_tensor, X_test_tensor, y_train_tensor, y_test_tensor, 
             optimizer.zero_grad()
             outputs = model(batch_X)
             
-            c = torch.linalg.lstsq(batch_X, batch_y).solution
-            c_pred = torch.linalg.lstsq(batch_X, outputs).solution
+            c = torch.linalg.lstsq(batch_X, batch_y).solution # torch.linalg.pinv((batch_X.T @ batch_X)) @ (batch_X.T @ batch_y)
+            c_pred = torch.linalg.lstsq(batch_X, outputs).solution # torch.linalg.pinv((batch_X.T @ batch_X)) @ (batch_X.T @ outputs)
             loss = criterion(batch_X @ c_pred, batch_X @ c) # RLP Loss
     
             # Backward pass

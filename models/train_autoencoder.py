@@ -89,10 +89,7 @@ def train_autoencoder(data, test,epochs, batch_size, model_type, loss_type, inpu
                 outputs = model(batch_X)
 
                 c = torch.linalg.lstsq(batch_X, batch_X).solution#torch.matmul(XTX_inv, XTy)
-                #XTy_hat = torch.matmul(batch_X, outputs)#torch.linalg.lstsq(batch_X, outputs).solution
                 c_pred = torch.linalg.lstsq(batch_X, outputs).solution #torch.matmul(XTX_inv, XTy_hat)
-                #print(c_pred.shape)
-        
 
                 # You could use a custom loss here
                 loss = distance(batch_X @ c_pred, batch_X @ c)
@@ -105,16 +102,12 @@ def train_autoencoder(data, test,epochs, batch_size, model_type, loss_type, inpu
 
             model.eval()
             X_train_tensor = X_train_tensor.view(X_train_tensor.size(0), -1)
-            print(X_train_tensor.shape)
             prediction_train = model(X_train_tensor.to(device))
             prediction_test = model(X_test_tensor.to(device))
             
-            train_perf = calculate_fretchet(prediction_train, X_train_tensor)
-            #print(train_perf)
+            train_perf = calculate_fretchet(prediction_train, X_train_tensor) # distance(X_train_tensor, prediction_train) # 
             test_perf = calculate_fretchet(prediction_test, X_test_tensor)
             print(f'Epoch [{epoch + 1}/{epochs}], Train Loss: {epoch_loss:.4f},    Test Loss: {loss:.4f}, Train Performance: {train_perf:.4f}, Test Performance: {test_perf:.4f}')
-
-            #print(f'Epoch [{epoch + 1}/{epochs}], Train Loss: {epoch_loss:.4f},    Test Loss: {loss:.4f}')
     
     sample_images = prediction_test[:25].unsqueeze(1) / 255.0
     save_images(sample_images, 'generated images')
