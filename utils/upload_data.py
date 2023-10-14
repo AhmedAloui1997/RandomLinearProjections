@@ -9,14 +9,26 @@ def LoadDataset(DatasetName):
         # load California Housing
         california = fetch_california_housing()
         output1, output2 = california.data, np.expand_dims(california.target,1)
+        
     elif DatasetName == "WineQuality":
         # Fetch the "Elevators" dataset from OpenML
         wine = fetch_openml(name='wine_quality', version=1)
         output1, output2 = wine.data.to_numpy(), np.expand_dims(wine.target.to_numpy(),1)
-    elif DatasetName == "1DPolynomial":
-        pass # create dataset
-    elif DatasetName == "5DPolynomial": 
-        pass # create dataset
+        
+    elif DatasetName == "Linear":
+        # MULTIDIMENSIONAL DATASET
+        rng = np.random.RandomState(0)
+        X = rng.rand(6000, 5) # Same dataset will now be used across different trials
+        y = np.expand_dims((0.5*X[:,0] + 1.5*X[:,1] + 2.5*X[:,2] + 3.5*X[:,3] + 4.5*X[:,4]), 1)
+        output1, output2 = X, y
+    
+    elif DatasetName == "Nonlinear": 
+        # MULTIDIMENSIONAL DATASET
+        rng = np.random.RandomState(1)
+        X = rng.rand(6000, 7) # Same dataset will now be used across different trials
+        y = np.expand_dims((X[:,0] + X[:,1]**2 + X[:,2]**3 + X[:,3]**4 + X[:,4]**5 + np.exp(X[:,5]) + np.sin(X[:,6])), 1)
+        output1, output2 = X, y
+        
     elif DatasetName == "TrigonometricFunctions":
         pass # create dataset
     # image datasets
