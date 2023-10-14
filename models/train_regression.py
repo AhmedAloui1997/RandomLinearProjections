@@ -7,7 +7,7 @@ from models.classes import RegressionModel, Autoencoder
 from utils.process_data import SplitDataset, add_gaussian_noise
 from utils.process_data import balanced_batch_generator_reg, balanced_batch_generator_auto
 
-def train(X, y, noise, shift, train_size, task, iterations, epochs, batch_size, num_batches, loss_function):
+def train(X, y, eval_metric, noise, shift, train_size, task, iterations, epochs, batch_size, num_batches, loss_function):
     train_losses = np.zeros((iterations, epochs))
     test_losses = np.zeros((iterations, epochs))
     
@@ -34,21 +34,21 @@ def train(X, y, noise, shift, train_size, task, iterations, epochs, batch_size, 
         
         if loss_function == 'MSE':  
             optimizer = optim.Adam(model.parameters(), lr=0.0001)
-            loss_train, loss_test = train_mse_reg(X_train_tensor, X_test_tensor, y_train_tensor, y_test_tensor, iterations, i, epochs, batch_size, model, optimizer, criterion)
+            loss_train, loss_test = train_mse_reg(X_train_tensor, X_test_tensor, y_train_tensor, y_test_tensor, iterations, i, epochs, batch_size, model, optimizer, criterion, eval_metric)
         
         elif loss_function == 'MSEL2':  
             optimizer = optim.Adam(model.parameters(), lr=0.0001, weight_decay=1e-4)
-            loss_train, loss_test = train_mse_reg(X_train_tensor, X_test_tensor, y_train_tensor, y_test_tensor, iterations, i, epochs, batch_size, model, optimizer, criterion)
+            loss_train, loss_test = train_mse_reg(X_train_tensor, X_test_tensor, y_train_tensor, y_test_tensor, iterations, i, epochs, batch_size, model, optimizer, criterion, eval_metric)
 
         elif loss_function == 'RLP':
             optimizer = optim.Adam(model.parameters(), lr=0.0001)
-            loss_train, loss_test = train_rlp_reg(X_train_tensor, X_test_tensor, y_train_tensor, y_test_tensor, iterations, i, epochs, batch_size, num_batches, model, optimizer, criterion)
+            loss_train, loss_test = train_rlp_reg(X_train_tensor, X_test_tensor, y_train_tensor, y_test_tensor, iterations, i, epochs, batch_size, num_batches, model, optimizer, criterion, eval_metric)
                 
         train_losses[i,:], test_losses[i,:] = loss_train, loss_test
 
     return train_losses, test_losses
         
-def train_mse_reg(X_train_tensor, X_test_tensor, y_train_tensor, y_test_tensor, iterations, i, epochs, batch_size, model, optimizer, criterion):
+def train_mse_reg(X_train_tensor, X_test_tensor, y_train_tensor, y_test_tensor, iterations, i, epochs, batch_size, model, optimizer, criterion, eval_metric):
     # Create DataLoader
     train_dataset = TensorDataset(X_train_tensor, y_train_tensor)
     train_dataloader = DataLoader(train_dataset, batch_size, shuffle=True)
@@ -76,7 +76,15 @@ def train_mse_reg(X_train_tensor, X_test_tensor, y_train_tensor, y_test_tensor, 
     
         model.eval()
         test_outputs = model(X_test_tensor)
-        test_loss = criterion(test_outputs, y_test_tensor).detach().numpy()
+        if eval_metric == 'MSE':
+            test_loss = criterion(test_outputs, y_test_tensor).detach().numpy()
+        elif eval_metric == 'RLP':
+            c = torch.linalg.lstsq(X_test_tensor, y_test_tensor).solution # torch.linalg.pinv((batch_X.T @ batch_X)) @ (batch_X.T @ batch_y)
+            c_pred = torch.linalg.lstsq(X_test_tensor, test_outputs).solution # torch.linalg.pinv((batch_X.T @ batch_X)) @ (batch_X.T @ outputs)
+            test_loss = criterion(X_test_tensor @ c_pred, X_test_tensor @ c).detach().numpy()
+        else:
+            print('Error: Evaluation metric must be MSE or RLP')
+            exit(1)
     
         epoch_loss /= len(train_dataloader)
         loss_train[epoch] = epoch_loss
@@ -85,7 +93,7 @@ def train_mse_reg(X_train_tensor, X_test_tensor, y_train_tensor, y_test_tensor, 
         
     return loss_train, loss_test
 
-def train_rlp_reg(X_train_tensor, X_test_tensor, y_train_tensor, y_test_tensor, iterations, i, epochs, batch_size, num_batches, model, optimizer, criterion):    
+def train_rlp_reg(X_train_tensor, X_test_tensor, y_train_tensor, y_test_tensor, iterations, i, epochs, batch_size, num_batches, model, optimizer, criterion, eval_metric):    
     # Randomly select N unique batches to use for each epoch
     unique_batches = list(balanced_batch_generator_reg(X_train_tensor, y_train_tensor, batch_size, num_batches))
     
@@ -115,7 +123,15 @@ def train_rlp_reg(X_train_tensor, X_test_tensor, y_train_tensor, y_test_tensor, 
     
         model.eval()
         test_outputs = model(X_test_tensor)
-        test_loss = criterion(test_outputs, y_test_tensor).detach().numpy()
+        if eval_metric == 'MSE':
+            test_loss = criterion(test_outputs, y_test_tensor).detach().numpy()
+        elif eval_metric == 'RLP':
+            c = torch.linalg.lstsq(X_test_tensor, y_test_tensor).solution # torch.linalg.pinv((batch_X.T @ batch_X)) @ (batch_X.T @ batch_y)
+            c_pred = torch.linalg.lstsq(X_test_tensor, test_outputs).solution # torch.linalg.pinv((batch_X.T @ batch_X)) @ (batch_X.T @ outputs)
+            test_loss = criterion(X_test_tensor @ c_pred, X_test_tensor @ c).detach().numpy()
+        else:
+            print('Error: Evaluation metric must be MSE or RLP')
+            exit(1)
     
         epoch_loss /= num_batches
         loss_train[epoch] = epoch_loss
