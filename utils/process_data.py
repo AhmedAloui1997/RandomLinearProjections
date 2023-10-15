@@ -2,50 +2,45 @@ import torch
 import numpy as np
 from sklearn.model_selection import train_test_split
 
-def balanced_batch_generator_reg(data, labels, N, K):
+def balanced_batch_generator_reg(data, labels, M, K):
     """
-    Generates K batches of data and associated labels, each of size N, ensuring 
+    Generates K batches of data and associated labels, each of size M, ensuring 
     that each data point appears in at least one batch.
 
     Parameters:
     - data (numpy.array): The dataset.
     - labels (numpy.array): Corresponding labels for the dataset.
-    - N (int): Batch size.
+    - M (int): Batch size.
     - K (int): Number of batches.
 
     Yields:
     - tuple: Batches of data and corresponding labels.
     """
 
-    # Determine the total number of samples in the dataset
+    # Get total number of data samples
     num_samples = len(data)
 
-    # Use a set to keep track of batches to ensure uniqueness
+    # Initialize a set to track unique batches
     selected_batches = set()
 
-    # All available indices from 0 to num_samples
-    all_indices = np.arange(num_samples)
-
-    # Shuffle the indices to ensure randomness
-    np.random.shuffle(all_indices)
-
-    # Assign data points to batches, ensuring each data point is in at least one batch
-    for i in range(0, num_samples, N):
-        selected_batches.add(tuple(sorted(all_indices[i:i+N])))
-
-    # Continuously sample random unique batches until we have a total of K batches
+    # Sample until we obtain K unique batches
     while len(selected_batches) < K:
-        # Randomly select N indices without replacement
-        batch_indices = tuple(sorted(np.random.choice(num_samples, N, replace=False)))
+        # Generate indices and shuffle them
+        all_indices = np.arange(num_samples)
+        np.random.shuffle(all_indices)
+        
+        # Iterate over data and form batches of size M
+        for i in range(0, num_samples, M):
+            batch_indices = tuple(sorted(all_indices[i:i+M]))
+            if batch_indices not in selected_batches:
+                selected_batches.add(batch_indices)
+            if len(selected_batches) >= K:
+                break
 
-        # Ensure uniqueness of the batch
-        if batch_indices not in selected_batches:
-            selected_batches.add(batch_indices)
-
-    # Convert the set back to a list for easier indexing
+    # Transform the set to a list
     selected_batches = list(selected_batches)
 
-    # Yield batches of data and their corresponding labels one by one
+    # Yield data batches with their labels
     for indices in selected_batches:
         yield data[np.array(indices)], labels[np.array(indices)]
 
@@ -64,37 +59,32 @@ def balanced_batch_generator_auto(data, M, K):
     - torch.Tensor: Batches of data.
     """
 
-    # Determine the total number of samples in the dataset
+    # Get total number of data samples
     num_samples = len(data)
 
-    # Use a set to keep track of batches to ensure uniqueness
+    # Initialize a set to track unique batches
     selected_batches = set()
 
-    # All available indices from 0 to num_samples
-    all_indices = np.arange(num_samples)
-
-    # Shuffle the indices to ensure randomness
-    np.random.shuffle(all_indices)
-
-    # Assign data points to batches, ensuring each data point is in at least one batch
-    for i in range(0, num_samples, M):
-        selected_batches.add(tuple(sorted(all_indices[i:i+M])))
-
-    # Continuously sample random unique batches until we have a total of K batches
+    # Sample until we obtain K unique batches
     while len(selected_batches) < K:
-        # Randomly select N indices without replacement
-        batch_indices = tuple(sorted(np.random.choice(num_samples, M, replace=False)))
+        # Generate indices and shuffle them
+        all_indices = np.arange(num_samples)
+        np.random.shuffle(all_indices)
+        
+        # Iterate over data and form batches of size M
+        for i in range(0, num_samples, M):
+            batch_indices = tuple(sorted(all_indices[i:i+M]))
+            if batch_indices not in selected_batches:
+                selected_batches.add(batch_indices)
+            if len(selected_batches) >= K:
+                break
 
-        # Ensure uniqueness of the batch
-        if batch_indices not in selected_batches:
-            selected_batches.add(batch_indices)
-
-    # Convert the set back to a list for easier indexing
+    # Transform the set to a list
     selected_batches = list(selected_batches)
 
-    # Yield batches one by one
+    # Yield data batches
     for indices in selected_batches:
-        yield data[torch.tensor(indices)]  # Convert indices to torch tensor for indexing
+        yield data[np.array(indices)]
 
 
 def SplitDataset(X, y, shift, train_size):
