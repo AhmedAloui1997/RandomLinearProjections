@@ -31,11 +31,13 @@ def balanced_batch_generator_reg(data, labels, M, K):
         
         # Iterate over data and form batches of size M
         for i in range(0, num_samples, M):
+            # if i + M >= num_samples: break (removes last batch if needed)
+        
             batch_indices = tuple(sorted(all_indices[i:i+M]))
             if batch_indices not in selected_batches:
                 selected_batches.add(batch_indices)
-            if len(selected_batches) >= K:
-                break
+            
+            if len(selected_batches) >= K: break
 
     # Transform the set to a list
     selected_batches = list(selected_batches)
@@ -73,11 +75,13 @@ def balanced_batch_generator_auto(data, M, K):
         
         # Iterate over data and form batches of size M
         for i in range(0, num_samples, M):
+            # if i + M >= num_samples: break (removes last batch if needed)
+            
             batch_indices = tuple(sorted(all_indices[i:i+M]))
             if batch_indices not in selected_batches:
                 selected_batches.add(batch_indices)
-            if len(selected_batches) >= K:
-                break
+              
+            if len(selected_batches) >= K: break
 
     # Transform the set to a list
     selected_batches = list(selected_batches)
