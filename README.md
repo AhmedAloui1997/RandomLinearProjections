@@ -2,22 +2,15 @@
 
 ## Overview
 
-This script provides a framework for running simulations on specified datasets for two primary tasks: Regression and Autoencoder. The user can customize several parameters including the dataset to use, task type, loss function, evaluation metric, and various training parameters. After running the simulations, the script will save the train and test losses to CSV files organized in respective directories.
+This code implements the definition of a new loss function entitled Random Linear Projection Loss and provides a framework for running simulations on specified datasets for two primary tasks: Regression and Autoencoder comparing the performance of RLP to MSE and MSE+L2. it also includes two jupyter notebooks, one for a toy classification example (Moons Dataset), and the MNIST dataset. The user can customize several parameters including the dataset to use, task type, loss function, evaluation metric, and various training parameters. After running the simulations, the script will save the train and test losses to CSV files organized in respective directories.
 
 ## Requirements
 
 - Python 3.x
 - Libraries:
-  - argparse
   - numpy
   - torch
-  - os
-  - sys
-  - Ensure that the path `./RandomLinearProjections` is accessible and contains the following modules:
-    - `upload_data`
-    - `process_data`
-    - `train_regression`
-    - `train_autoencoder`
+
 
 ## Usage
 
@@ -57,3 +50,9 @@ Results/[EVAL_METRIC]/[TRAIN/TEST]_[DatasetName]_[task]_[loss_function]_TrainSiz
 ## Note
 
 Before running the script, ensure that the required libraries are installed and that the path to the `RandomLinearProjections` directory is correctly set.
+
+## Citation: 
+
+Shyam Venkatasubramanian*, Ahmed Aloui*, Vahid Tarokh. "Random Linear Projections Loss for Hyperplane-Based Optimization in Regression Neural Networks".
+
+
