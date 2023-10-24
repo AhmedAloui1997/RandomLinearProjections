@@ -2,7 +2,7 @@
 
 ## Overview
 
-This code implements a new loss function entitled **Random Linear Projection (RLP) Loss**, and provides a framework for running simulations using RLP loss on specified datasets for two primary tasks: regression and reconstruction. This framework integrates the comparison of RLP loss, MSE loss, and MSE loss with $L_2$-regularization across the aforementioned tasks. We also provide two jupyter notebooks for classification on the Moons dataset and MNIST using RLP loss. The user can customize several parameters, including the dataset to use, task type, loss function, evaluation metric, and various training parameters. After running the simulations, the script will save the train and test losses to CSV files organized in respective directories.
+This code implements the **Random Linear Projections (RLP) Loss**, and provides a framework for running simulations using RLP loss on specified datasets for two primary tasks: regression and reconstruction. This framework integrates the comparison of RLP loss, MSE loss, and MSE loss with $L_2$-regularization across the aforementioned tasks. We also provide two jupyter notebooks for classification on the Moons dataset and MNIST using RLP loss. The user can customize several parameters, including the dataset to use, task type, loss function, evaluation metric, and various training parameters. After running the simulations, the script will save the train and test losses to CSV files organized in respective directories.
 
 ## Requirements
 
