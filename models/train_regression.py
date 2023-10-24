@@ -31,33 +31,37 @@ def train(X, y, eval_metric, noise, shift, train_size, task, iterations, epochs,
         output_size = 1
         model = RegressionModel(input_size, hidden_size, output_size)
         criterion = nn.MSELoss()
-        learning_rate = 0.0005
+        learning_rate = 0.0001
         
         if loss_function == 'MSE':  
-            optimizer = optim.AdamW(model.parameters(), lr=learning_rate)
+            optimizer = optim.Adam(model.parameters(), lr=learning_rate)
             loss_train, loss_test = train_mse_reg(X_train_tensor, X_test_tensor, y_train_tensor, y_test_tensor, iterations, i, epochs, batch_size, model, optimizer, criterion, eval_metric)
         
         elif loss_function == 'MSEL2':  
-            optimizer = optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=1e-4)
+            optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=1e-4)
             loss_train, loss_test = train_mse_reg(X_train_tensor, X_test_tensor, y_train_tensor, y_test_tensor, iterations, i, epochs, batch_size, model, optimizer, criterion, eval_metric)
 
         elif loss_function == 'RLP':
-            optimizer = optim.AdamW(model.parameters(), lr=learning_rate)
+            optimizer = optim.Adam(model.parameters(), lr=learning_rate)
             loss_train, loss_test = train_rlp_reg(X_train_tensor, X_test_tensor, y_train_tensor, y_test_tensor, iterations, i, epochs, batch_size, num_batches, model, optimizer, criterion, eval_metric)
         
         elif loss_function == 'MIXUP':
-            optimizer = optim.AdamW(model.parameters(), lr=learning_rate)
+            optimizer = optim.Adam(model.parameters(), lr=learning_rate)
             loss_train, loss_test = train_mixup_reg(X_train_tensor, X_test_tensor, y_train_tensor, y_test_tensor, iterations, i, epochs, batch_size, model, optimizer, criterion, eval_metric)
                       
         elif loss_function == 'RLPMIX':
-            optimizer = optim.AdamW(model.parameters(), lr=learning_rate)
+            optimizer = optim.Adam(model.parameters(), lr=learning_rate)
             loss_train, loss_test = train_rlpmix_reg(X_train_tensor, X_test_tensor, y_train_tensor, y_test_tensor, iterations, i, epochs, batch_size, num_batches, model, optimizer, criterion, eval_metric)
+        else:
+            print('Error: Loss function not recognized.')
+            exit(1)
             
         train_losses[i,:], test_losses[i,:] = loss_train, loss_test
 
     return train_losses, test_losses
-        
 
+        
+# Training Regression Neural Network with MSE loss
 def train_mse_reg(X_train_tensor, X_test_tensor, y_train_tensor, y_test_tensor, iterations, i, epochs, batch_size, model, optimizer, criterion, eval_metric):
     # Create DataLoader
     train_dataset = TensorDataset(X_train_tensor, y_train_tensor)
@@ -86,11 +90,16 @@ def train_mse_reg(X_train_tensor, X_test_tensor, y_train_tensor, y_test_tensor, 
     
         model.eval()
         test_outputs = model(X_test_tensor)
+        
+        # Using MSE to measure test performance
         if eval_metric == 'MSE':
             test_loss = criterion(test_outputs, y_test_tensor).detach().numpy()
+        # Using RLP to measure test performance
         elif eval_metric == 'RLP':
-            c = torch.linalg.pinv((X_test_tensor.T @ X_test_tensor)) @ (X_test_tensor.T @ y_test_tensor)
-            c_pred = torch.linalg.pinv((X_test_tensor.T @ X_test_tensor)) @ (X_test_tensor.T @ test_outputs)
+            # c = torch.linalg.pinv((X_test_tensor.T @ X_test_tensor)) @ (X_test_tensor.T @ y_test_tensor)
+            # c_pred = torch.linalg.pinv((X_test_tensor.T @ X_test_tensor)) @ (X_test_tensor.T @ test_outputs)
+            c = torch.linalg.lstsq(X_test_tensor, y_test_tensor).solution
+            c_pred = torch.linalg.lstsq(X_test_tensor, test_outputs).solution
             test_loss = criterion(X_test_tensor @ c_pred, X_test_tensor @ c).detach().numpy()
         else:
             print('Error: Evaluation metric must be MSE or RLP')
@@ -104,6 +113,7 @@ def train_mse_reg(X_train_tensor, X_test_tensor, y_train_tensor, y_test_tensor, 
     return loss_train, loss_test
 
 
+# Training Regression Neural Network with RLP loss
 def train_rlp_reg(X_train_tensor, X_test_tensor, y_train_tensor, y_test_tensor, iterations, i, epochs, batch_size, num_batches, model, optimizer, criterion, eval_metric):    
     # Randomly select N unique batches to use for each epoch
     unique_batches = list(balanced_batch_generator_reg(X_train_tensor, y_train_tensor, batch_size, num_batches))
@@ -136,11 +146,16 @@ def train_rlp_reg(X_train_tensor, X_test_tensor, y_train_tensor, y_test_tensor, 
     
         model.eval()
         test_outputs = model(X_test_tensor)
+        
+        # Using MSE to measure test performance
         if eval_metric == 'MSE':
             test_loss = criterion(test_outputs, y_test_tensor).detach().numpy()
+        # Using RLP to measure test performance
         elif eval_metric == 'RLP':
-            c = torch.linalg.pinv((X_test_tensor.T @ X_test_tensor)) @ (X_test_tensor.T @ y_test_tensor)
-            c_pred = torch.linalg.pinv((X_test_tensor.T @ X_test_tensor)) @ (X_test_tensor.T @ test_outputs)
+            # c = torch.linalg.pinv((X_test_tensor.T @ X_test_tensor)) @ (X_test_tensor.T @ y_test_tensor)
+            # c_pred = torch.linalg.pinv((X_test_tensor.T @ X_test_tensor)) @ (X_test_tensor.T @ test_outputs)
+            c = torch.linalg.lstsq(X_test_tensor, y_test_tensor).solution
+            c_pred = torch.linalg.lstsq(X_test_tensor, test_outputs).solution
             test_loss = criterion(X_test_tensor @ c_pred, X_test_tensor @ c).detach().numpy()
         else:
             print('Error: Evaluation metric must be MSE or RLP')
@@ -154,6 +169,7 @@ def train_rlp_reg(X_train_tensor, X_test_tensor, y_train_tensor, y_test_tensor, 
     return loss_train, loss_test
 
 
+# Training Regression Neural Network with mixup-augmented MSE
 def train_mixup_reg(X_train_tensor, X_test_tensor, y_train_tensor, y_test_tensor, iterations, i, epochs, batch_size, model, optimizer, criterion, eval_metric):
     # Create DataLoader
     train_dataset = TensorDataset(X_train_tensor, y_train_tensor)
@@ -190,11 +206,16 @@ def train_mixup_reg(X_train_tensor, X_test_tensor, y_train_tensor, y_test_tensor
     
         model.eval()
         test_outputs = model(X_test_tensor)
+        
+        # Using MSE to measure test performance
         if eval_metric == 'MSE':
             test_loss = criterion(test_outputs, y_test_tensor).detach().numpy()
+        # Using RLP to measure test performance
         elif eval_metric == 'RLP':
-            c = torch.linalg.pinv((X_test_tensor.T @ X_test_tensor)) @ (X_test_tensor.T @ y_test_tensor)
-            c_pred = torch.linalg.pinv((X_test_tensor.T @ X_test_tensor)) @ (X_test_tensor.T @ test_outputs)
+            # c = torch.linalg.pinv((X_test_tensor.T @ X_test_tensor)) @ (X_test_tensor.T @ y_test_tensor)
+            # c_pred = torch.linalg.pinv((X_test_tensor.T @ X_test_tensor)) @ (X_test_tensor.T @ test_outputs)
+            c = torch.linalg.lstsq(X_test_tensor, y_test_tensor).solution
+            c_pred = torch.linalg.lstsq(X_test_tensor, test_outputs).solution
             test_loss = criterion(X_test_tensor @ c_pred, X_test_tensor @ c).detach().numpy()
         else:
             print('Error: Evaluation metric must be MSE or RLP')
@@ -208,6 +229,7 @@ def train_mixup_reg(X_train_tensor, X_test_tensor, y_train_tensor, y_test_tensor
     return loss_train, loss_test
 
 
+# Training Regression Neural Network with mixup-augmented RLP
 def train_rlpmix_reg(X_train_tensor, X_test_tensor, y_train_tensor, y_test_tensor, iterations, i, epochs, batch_size, num_batches, model, optimizer, criterion, eval_metric):    
     # Randomly select N unique batches to use for each epoch
     unique_batches = list(balanced_batch_generator_reg(X_train_tensor, y_train_tensor, batch_size, num_batches))
@@ -246,11 +268,17 @@ def train_rlpmix_reg(X_train_tensor, X_test_tensor, y_train_tensor, y_test_tenso
     
         model.eval()
         test_outputs = model(X_test_tensor)
+        
+        # Using MSE to measure test performance
         if eval_metric == 'MSE':
             test_loss = criterion(test_outputs, y_test_tensor).detach().numpy()
+            
+        # Using RLP to measure test performance
         elif eval_metric == 'RLP':
-            c = torch.linalg.pinv((X_test_tensor.T @ X_test_tensor)) @ (X_test_tensor.T @ y_test_tensor)
-            c_pred = torch.linalg.pinv((X_test_tensor.T @ X_test_tensor)) @ (X_test_tensor.T @ test_outputs)
+            # c = torch.linalg.pinv((X_test_tensor.T @ X_test_tensor)) @ (X_test_tensor.T @ y_test_tensor)
+            # c_pred = torch.linalg.pinv((X_test_tensor.T @ X_test_tensor)) @ (X_test_tensor.T @ test_outputs)
+            c = torch.linalg.lstsq(X_test_tensor, y_test_tensor).solution
+            c_pred = torch.linalg.lstsq(X_test_tensor, test_outputs).solution
             test_loss = criterion(X_test_tensor @ c_pred, X_test_tensor @ c).detach().numpy()
         else:
             print('Error: Evaluation metric must be MSE or RLP')
