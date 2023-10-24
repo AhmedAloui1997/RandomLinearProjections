@@ -31,7 +31,7 @@ def balanced_batch_generator_reg(data, labels, M, K):
         
         # Iterate over data and form batches of size M
         for i in range(0, num_samples, M):
-            # if i + M >= num_samples: break (removes last batch if needed)
+            if i + M >= num_samples: break # (removes last batch if needed)
         
             batch_indices = tuple(sorted(all_indices[i:i+M]))
             if batch_indices not in selected_batches:
@@ -75,7 +75,7 @@ def balanced_batch_generator_auto(data, M, K):
         
         # Iterate over data and form batches of size M
         for i in range(0, num_samples, M):
-            # if i + M >= num_samples: break (removes last batch if needed)
+            if i + M >= num_samples: break # (removes last batch if needed)
             
             batch_indices = tuple(sorted(all_indices[i:i+M]))
             if batch_indices not in selected_batches:
@@ -195,7 +195,7 @@ def train_test_split_fixed(X, y, train_size, shuffle=True, random_state=None):
     return X_train, X_test, y_train, y_test
 
 
-def add_gaussian_noise(X_train, alpha):
+def add_gaussian_noise(X_train, beta):
     """
     Add standard normal noise with specified scaling factor (alpha) to X_train.
     
@@ -211,6 +211,6 @@ def add_gaussian_noise(X_train, alpha):
     noise = np.random.normal(0, 1, X_train.shape)
     
     # Add the noise to X_train
-    X_train = X_train + noise * alpha
+    X_train = X_train + noise * beta
     
     return X_train
