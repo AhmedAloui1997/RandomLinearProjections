@@ -46,9 +46,7 @@ if __name__ == "__main__":
     elif task == 'Autoencoder':
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         X_train, X_test = LoadDataset(DatasetName)
-        train_losses, test_losses = train_encoder_results(X_train, X_test, shift, train_size, task, iterations, epochs, batch_size, num_batches, loss_function, device)
-    elif task == 'VAE':
-        pass
+        train_losses, test_losses = train_encoder_results(DatasetName, train_size, X_train, X_test, task, iterations, epochs, batch_size, num_batches, loss_function, device)
     else:
         print('Error: Task must be Regression or Autoencoder')
         exit(1)
