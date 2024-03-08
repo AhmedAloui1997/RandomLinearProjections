@@ -31,7 +31,7 @@ python3 main.py --Dataset "DatasetName" (optional arguments)
 6. `--NumBatches` (Default: `1000`): Number of RLP Loss Training Batches.
 7. `--Epochs` (Default: `500`): Number of training epochs.
 8. `--Iterations` (Default: `30`): Number of iterations to repeat the task.
-9. `--Shift`: Dataset shift. Not required by default.
+9. `--Shift`: Distribution Shift Bias. Not required by default.
 10. `--Noise`: Noise Scaling Factor. Not required by default.
 11. `--EvalMetric` (Default: `MSE`): Evaluation metric. Can be either `MSE` or `RLP`.
 
