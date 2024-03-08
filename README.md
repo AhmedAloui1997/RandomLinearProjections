@@ -54,8 +54,11 @@ Before running the script, ensure that the required libraries are installed and 
 
 ## Citation: 
 
+Plain Text:
+```
 Shyam Venkatasubramanian*, Ahmed Aloui*, Vahid Tarokh. Random Linear Projections Loss for Hyperplane-Based Optimization in Neural Networks. arXiv preprint arXiv:2311.12356
-
+```
+BibTeX:
 ```
 @misc{shyamahmed2024random,
       title={Random Linear Projections Loss for Hyperplane-Based Optimization in Neural Networks}, 
