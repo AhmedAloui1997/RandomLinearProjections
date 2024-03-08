@@ -64,7 +64,5 @@ Before running the script, ensure that the required libraries are installed and 
       primaryClass={cs.LG}
 }
 ```
-```
-Shyam Venkatasubramanian*, Ahmed Aloui*, Vahid Tarokh. "Random Linear Projections Loss for Hyperplane-Based Optimization in Regression Neural Networks".
-```
+Shyam Venkatasubramanian*, Ahmed Aloui*, Vahid Tarokh. "Random Linear Projections Loss for Hyperplane-Based Optimization in Neural Networks".
 
