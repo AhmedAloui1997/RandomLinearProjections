@@ -1,4 +1,4 @@
-# RandomLinearProjections
+# Random Linear Projections
 
 ## Overview
 
